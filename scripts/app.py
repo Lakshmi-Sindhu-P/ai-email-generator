@@ -35,12 +35,25 @@ except DatabaseError as e:
     st.stop()
 
 # Validate configuration
-try:
-    validate_config()
-except ValueError as e:
-    st.error(f"⚠️ Configuration Error: {e}")
-    st.info("Please create a `.env` file with your `OPENAI_API_KEY`. See `.env.example` for reference.")
-    logger.error(f"Configuration error: {e}")
+if not validate_config(raise_error=False):
+    st.error("⚠️ Configuration Error: OPENAI_API_KEY not found")
+    
+    st.info("""
+    **To fix this issue:**
+    
+    **Local Development:**
+    1. Copy `.env.example` to `.env`
+    2. Add your OpenAI API key: `OPENAI_API_KEY=your_key_here`
+    3. Restart the app
+    
+    **Streamlit Cloud:**
+    1. Go to your app settings
+    2. Click on "Secrets" in the sidebar
+    3. Add: `OPENAI_API_KEY = "your_key_here"`
+    4. Save and redeploy
+    """)
+    
+    logger.error("OpenAI API key not configured")
     st.stop()
 
 # Load dataset

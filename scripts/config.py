@@ -9,6 +9,13 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()
 
+# Check if running on Streamlit Cloud
+try:
+    import streamlit as st
+    IS_STREAMLIT_CLOUD = hasattr(st, 'secrets') and len(st.secrets) > 0
+except:
+    IS_STREAMLIT_CLOUD = False
+
 # Project Paths
 PROJECT_ROOT = Path(__file__).parent.parent
 SCRIPTS_DIR = PROJECT_ROOT / "scripts"
@@ -18,8 +25,15 @@ LOGS_DIR = PROJECT_ROOT / "logs"
 # Ensure logs directory exists
 LOGS_DIR.mkdir(exist_ok=True)
 
-# OpenAI Configuration
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
+# OpenAI Configuration - support both .env and Streamlit secrets
+if IS_STREAMLIT_CLOUD:
+    try:
+        import streamlit as st
+        OPENAI_API_KEY = st.secrets.get("OPENAI_API_KEY", "")
+    except:
+        OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
+else:
+    OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-3.5-turbo")
 OPENAI_MAX_TOKENS = int(os.getenv("OPENAI_MAX_TOKENS", "350"))
 OPENAI_TEMPERATURE = float(os.getenv("OPENAI_TEMPERATURE", "0.7"))
@@ -64,12 +78,25 @@ GPT_35_TURBO_OUTPUT_COST = 0.002  # $0.002 per 1K tokens
 GPT_4_INPUT_COST = 0.03
 GPT_4_OUTPUT_COST = 0.06
 
-def validate_config():
-    """Validate that all required configuration is present."""
+def validate_config(raise_error: bool = False):
+    """
+    Validate that all required configuration is present.
+    
+    Args:
+        raise_error: If True, raise ValueError on missing config. 
+                     If False, return validation status.
+    
+    Returns:
+        True if valid, False otherwise
+    """
     if not OPENAI_API_KEY:
-        raise ValueError(
-            "OPENAI_API_KEY not found. Please set it in your .env file. "
-            "Copy .env.example to .env and add your API key."
+        error_msg = (
+            "OPENAI_API_KEY not found. "
+            "Local: Add it to your .env file (copy .env.example to .env). "
+            "Streamlit Cloud: Add it in Settings > Secrets as OPENAI_API_KEY = 'your-key-here'"
         )
+        if raise_error:
+            raise ValueError(error_msg)
+        return False
     return True
 

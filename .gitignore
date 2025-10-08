@@ -64,6 +64,8 @@ htmlcov/
 
 # Streamlit
 .streamlit/secrets.toml
+!.streamlit/secrets.toml.example
+!.streamlit/config.toml
 
 # OS
 Thumbs.db

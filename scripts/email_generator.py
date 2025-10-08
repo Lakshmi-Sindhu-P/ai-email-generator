@@ -20,15 +20,12 @@ from prompts import build_subject_prompt, build_email_prompt
 # Setup logger for this module
 logger = setup_logger(__name__)
 
-# Validate configuration on import
+# Create OpenAI client (will be None if no API key, but won't fail on import)
 try:
-    validate_config()
-except ValueError as e:
-    logger.error(f"Configuration error: {e}")
-    raise
-
-# Create OpenAI client
-client = OpenAI(api_key=OPENAI_API_KEY)
+    client = OpenAI(api_key=OPENAI_API_KEY) if OPENAI_API_KEY else None
+except Exception as e:
+    logger.warning(f"Could not initialize OpenAI client: {e}")
+    client = None
 
 
 class EmailGenerationError(Exception):
@@ -58,6 +55,11 @@ def generate_completion(
         EmailGenerationError: If generation fails after all retries
     """
     try:
+        if not client:
+            raise EmailGenerationError(
+                "OpenAI client not initialized. Please check your API key configuration."
+            )
+        
         logger.info(f"Generating completion with model: {OPENAI_MODEL}")
         logger.debug(f"Prompt length: {len(prompt)} characters")
         
