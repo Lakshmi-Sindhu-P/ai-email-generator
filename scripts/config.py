@@ -44,7 +44,16 @@ DATA_PATH = os.getenv(
 # Application Settings
 APP_TITLE = "AI Email Generator"
 APP_ICON = "📧"
-DEFAULT_TONES = ["Professional", "Friendly", "Formal", "Casual", "Persuasive", "Enthusiastic"]
+DEFAULT_TONES = [
+    "Professional",        # Standard business communication
+    "Empathetic",         # Understanding & compassionate (claims, difficult news)
+    "Formal",             # Legal, compliance, official matters
+    "Explanatory",        # Complex information, policy details
+    "Reassuring",         # Building confidence, addressing concerns
+    "Transparent",        # Honest, clear communication
+    "Solution-Oriented",  # Problem-solving, next steps
+    "Customer-Centric"    # Customer needs focused
+]
 DEFAULT_LENGTHS = ["Short", "Medium", "Long"]
 MAX_SUBJECT_LINES = 5
 NUM_EMAIL_DRAFTS = 2

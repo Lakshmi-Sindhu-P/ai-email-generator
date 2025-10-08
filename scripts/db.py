@@ -57,27 +57,27 @@ def init_db() -> None:
         logger.info(f"Initializing database at {DB_PATH}")
         
         with get_db_connection() as conn:
-            cur = conn.cursor()
+    cur = conn.cursor()
             
             # Main email logs table
-            cur.execute("""
-                CREATE TABLE IF NOT EXISTS email_logs (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS email_logs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
                     recipient TEXT NOT NULL,
-                    subject_context TEXT,
-                    tone TEXT,
-                    purpose TEXT,
-                    bullet_points TEXT,
-                    length TEXT,
-                    additional_notes TEXT,
-                    subjects TEXT,
-                    draft1 TEXT,
-                    draft2 TEXT,
+            subject_context TEXT,
+            tone TEXT,
+            purpose TEXT,
+            bullet_points TEXT,
+            length TEXT,
+            additional_notes TEXT,
+            subjects TEXT,
+            draft1 TEXT,
+            draft2 TEXT,
                     timestamp TEXT NOT NULL,
                     is_favorite INTEGER DEFAULT 0,
                     cost_estimate REAL DEFAULT 0.0
-                )
-            """)
+        )
+    """)
             
             # Create index for faster queries
             cur.execute("""
@@ -124,13 +124,13 @@ def save_email_log(
         logger.info("Saving email log to database")
         
         with get_db_connection() as conn:
-            cur = conn.cursor()
-            cur.execute("""
-                INSERT INTO email_logs (
-                    recipient, subject_context, tone, purpose, bullet_points, length,
+    cur = conn.cursor()
+    cur.execute("""
+        INSERT INTO email_logs (
+            recipient, subject_context, tone, purpose, bullet_points, length,
                     additional_notes, subjects, draft1, draft2, timestamp, cost_estimate
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, (
+    """, (
                 inputs.get('recipient', ''),
                 inputs.get('subject_context', ''),
                 inputs.get('tone', ''),
@@ -138,7 +138,7 @@ def save_email_log(
                 "; ".join(inputs.get('bullet_points', [])),
                 inputs.get('length', ''),
                 inputs.get('additional_notes', ''),
-                "; ".join(subjects),
+        "; ".join(subjects),
                 drafts[0] if len(drafts) > 0 else '',
                 drafts[1] if len(drafts) > 1 else '',
                 datetime.now().isoformat(),

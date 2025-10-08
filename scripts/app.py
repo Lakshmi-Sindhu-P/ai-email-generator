@@ -87,10 +87,12 @@ with col1:
         help="Brief context for the email subject"
     )
     
-    tone = st.selectbox(
-        "Tone *",
+    tone = st.multiselect(
+        "Tone (select 1-3) *",
         DEFAULT_TONES,
-        help="Select the tone that best fits your communication style"
+        default=[DEFAULT_TONES[0]],
+        max_selections=3,
+        help="Select up to 3 tones to create nuanced emails (e.g., Professional + Friendly)"
     )
 
 with col2:
@@ -153,12 +155,15 @@ if generate_button:
     inputs = {
         "recipient": recipient.strip() if recipient else "",
         "subject_context": subject_context.strip() if subject_context else "",
-        "tone": tone,
+        "tone": tone,  # List of tones
         "purpose": purpose.strip() if purpose else "",
         "bullet_points": [bp.strip() for bp in bullet_points.split('\n') if bp.strip()],
         "length": length,
         "additional_notes": additional_notes.strip() if additional_notes else ""
     }
+    
+    # Convert tone list to string for database storage
+    tone_str = ' + '.join(tone) if isinstance(tone, list) else tone
     
     # Validate inputs
     is_valid, error_message = validate_inputs(inputs)
@@ -176,9 +181,11 @@ if generate_button:
                 # Generate drafts
                 drafts = get_email_drafts(inputs, template)
                 
-                # Save to database
+                # Save to database (convert tone to string for storage)
                 try:
-                    log_id = save_email_log(inputs, subjects, drafts)
+                    storage_inputs = inputs.copy()
+                    storage_inputs['tone'] = tone_str
+                    log_id = save_email_log(storage_inputs, subjects, drafts)
                     logger.info(f"Email generation completed and saved with ID: {log_id}")
                 except DatabaseError as e:
                     logger.error(f"Failed to save email log: {e}")
@@ -208,15 +215,24 @@ if generate_button:
             
             for idx, (tab, draft) in enumerate(zip(tabs, drafts), 1):
                 with tab:
-                    # Show draft metadata
+                    # Show draft metadata with tone combination
                     col1, col2, col3 = st.columns(3)
                     with col1:
                         st.metric("Words", count_words(draft))
                     with col2:
                         st.metric("Characters", count_characters(draft))
                     with col3:
-                        draft_style = "Professional & Friendly" if idx == 1 else "Formal & Detailed"
-                        st.metric("Style", draft_style)
+                        # Determine tone combination for this draft
+                        if isinstance(tone, list) and len(tone) > 0:
+                            if len(tone) == 1:
+                                draft_tone = tone[0]
+                            elif len(tone) == 2:
+                                draft_tone = tone[0] if idx == 1 else f"{tone[0]} + {tone[1]}"
+                            else:  # 3 tones
+                                draft_tone = f"{tone[0]} + {tone[1]}" if idx == 1 else ' + '.join(tone)
+                        else:
+                            draft_tone = "Professional" if idx == 1 else "Formal"
+                        st.metric("Tone Used", draft_tone)
                     
                     st.markdown("---")
                     
