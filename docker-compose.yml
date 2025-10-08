@@ -1,0 +1,79 @@
+version: '3.8'
+
+services:
+  ai-email-generator:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ai-email-generator
+    ports:
+      - "8501:8501"
+    environment:
+      # Required: Set your OpenAI API key
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      
+      # Optional: Override default settings
+      - OPENAI_MODEL=${OPENAI_MODEL:-gpt-3.5-turbo}
+      - OPENAI_MAX_TOKENS=${OPENAI_MAX_TOKENS:-350}
+      - OPENAI_TEMPERATURE=${OPENAI_TEMPERATURE:-0.7}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      
+      # Streamlit settings
+      - STREAMLIT_SERVER_PORT=8501
+      - STREAMLIT_SERVER_ADDRESS=0.0.0.0
+      - STREAMLIT_SERVER_HEADLESS=true
+      - STREAMLIT_BROWSER_GATHER_USAGE_STATS=false
+    
+    volumes:
+      # Mount database for persistence
+      - ./data:/app/data
+      - ./logs:/app/logs
+      - ./exports:/app/exports
+      # Optional: Mount .env file if you prefer file-based config
+      # - ./.env:/app/.env:ro
+    
+    restart: unless-stopped
+    
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8501/_stcore/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    
+    # Resource limits (adjust based on your needs)
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+        reservations:
+          cpus: '1'
+          memory: 1G
+
+# Optional: Add a reverse proxy (nginx) for production
+#  nginx:
+#    image: nginx:alpine
+#    container_name: ai-email-nginx
+#    ports:
+#      - "80:80"
+#      - "443:443"
+#    volumes:
+#      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+#      - ./ssl:/etc/nginx/ssl:ro
+#    depends_on:
+#      - ai-email-generator
+#    restart: unless-stopped
+
+volumes:
+  data:
+    driver: local
+  logs:
+    driver: local
+  exports:
+    driver: local
+
+networks:
+  default:
+    name: ai-email-network
+
