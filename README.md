@@ -530,11 +530,3 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [ ] Analytics dashboard
 
 ---
-
-<div align="center">
-
-**Built with ❤️ by the AI Email Generator Team**
-
-[⭐ Star this repo](https://github.com/yourusername/ai-email-generator) | [🐛 Report Bug](https://github.com/yourusername/ai-email-generator/issues) | [✨ Request Feature](https://github.com/yourusername/ai-email-generator/issues)
-
-</div>
