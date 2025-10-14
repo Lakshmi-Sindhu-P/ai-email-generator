@@ -56,7 +56,8 @@
 ## 🎬 Demo Preview
 
 ### Main Interface
-![Email Generation Interface](docs/screenshot_main.png)
+![Email Generation Interface](<img width="1705" height="947" alt="Screenshot 2025-10-14 at 2 40 55 PM" src="https://github.com/user-attachments/assets/6a5512ff-3609-4dd3-884e-36cb65109f76" />
+)
 
 ### Generated Results
 ![Generated Emails](docs/screenshot_results.png)
